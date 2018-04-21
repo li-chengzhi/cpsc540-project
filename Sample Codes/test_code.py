@@ -1,5 +1,6 @@
 from PIL import Image
 import numpy
+import skimage.measure as skimage
 from scipy.cluster.vq import kmeans, vq
 
 # load image
@@ -12,9 +13,17 @@ imarray = numpy.array(im)
 # dat = numpy.reshape(imarray, (7709*6001, 4))
 
 # work with subimage
-# 
-n = 100
-dat = imarray[0:n, 0:n,]
+n = 2000 # roughly 1/7 of height
+width = imarray.shape[1]
+dat = imarray[0:n,width-n:width,:]
+
+# reduce number pixels by (1/2)^2 (max pooling)
+dat = skimage.block_reduce(dat, (2,2,1), numpy.max)
+n = 1000
+
+#n = 256
+#dat = imarray[0:n,:,:]
+#d = dat.shape[1]
 
 # display subimage
 im2 = Image.fromarray(dat)
@@ -27,10 +36,10 @@ dat2 = numpy.reshape(dat, (n*n, 4))
 dat3 = dat2 / 255
 
 # kmeans -- returns list of means ("codebook")
-codebook, distortion = kmeans(dat3, 3, 10)
+codebook, distortion = kmeans(dat3, 3, 100)
 
 # vector quant -- returns index of closest mean for each pixel ("code")
-code, dist = vq(dat3, codebook)
+code, dist = vq(dat3, codebook)    
 
 # replace list of index with mean
 dat4 = numpy.asarray([codebook[i] for i in code])
