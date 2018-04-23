@@ -1,5 +1,6 @@
 from PIL import Image
 import numpy
+import scipy
 import skimage.measure as skimage
 from sklearn.semi_supervised import label_propagation
 
@@ -73,13 +74,16 @@ im2.show()
 
 # label propagation inputs
 X = numpy.reshape(dat, (n*n,3))
-y = numpy.reshape(labeled_2d, (n*n))
+y = numpy.reshape(labeled_2d, (n*n)).astype(int)
+
+
+
 
 
 from label_prop import label_prop
-mask = label_prop(X,y,n,n,20)
+predicted_labels = label_prop(X,y,n,n,20)
 
-trans_labs = [numpy.unravel_index(i, (n,n)) for i, x in enumerate(mask) if x == 1]
+trans_labs = [numpy.unravel_index(i, (n,n)) for i, x in enumerate(predicted_labels) if x == 1]
 
 # display resulting labels
 dat_labeled = numpy.copy(dat)
@@ -98,9 +102,7 @@ im2.show()
 
 
 
-
 '''
-
 # set -1 for unlabeled
 y[y == 0] = -1
 
@@ -146,10 +148,31 @@ def custom_kernel(X1, X2):
     return W
 #    return -numpy.ones((X1.shape[0], X1.shape[0]))
 
-print(get_flattened_index(0,2,5,25))
 
-label_prop = label_propagation.LabelPropagation(custom_kernel, max_iter=500, n_jobs=-1)
+def get_neighbour_indices4(i, m, n):
+    (x,y) = numpy.unravel_index(i, (m,n))
+    return numpy.array(numpy.ravel_multi_index((a,b),(m,n)) for (a,b) in [(x-1, y), (x, y-1), (x+1, y), (x, y+1)] if a>=0 and a<m and b>=0 and b<n)
+
+def get_neighbour_indices8(i, m, n):
+    (x,y) = numpy.unravel_index(i, (m,n))
+    return numpy.array([numpy.ravel_multi_index((a,b),(m,n)) for (a,b) in [(x-1,y-1), (x-1,y), (x-1,y+1), (x,y-1), (x,y), (x,y+1), (x+1,y-1), (x+1,y), (x+1,y+1)] if a>=0 and a<m and b>=0 and b<n])
+
+
+threshold = 30
+def custom_kernel(X1,X2):
+    n1, d1 = X1.shape
+    n = numpy.sqrt(n1).astype(int)
+    W = numpy.zeros((n1,n1))
+    for i in range(n1):
+        ii = get_neighbour_indices8(i,n,n)
+        W[ii,i] = numpy.max(threshold - numpy.linalg.norm(X1[i]-X2[ii],axis=1),0)
+    return(scipy.sparse.csr_matrix(W))
+''
+print(1)
+label_prop = label_propagation.LabelPropagation(custom_kernel, max_iter=5, n_jobs=-1, tol = 1)
+print(1)
 label_prop.fit(X,y)
+
 
 trans_labels = label_prop.transduction_
 trans_labels = numpy.asarray(trans_labels)
