@@ -2,6 +2,7 @@ from PIL import Image
 import numpy
 import skimage.measure as skimage
 from puAdapter import PUAdapter
+from sklearn.ensemble import RandomForestClassifier
 
 # load image
 im = Image.open("clouds.tif")
@@ -64,8 +65,10 @@ numpy.apply_along_axis(colour_labeled, 1, lab_samp_reduced)
 im2 = Image.fromarray(dat_labeled)
 im2.show()
 
-
+# -------------------------
+# PUL - Random Forest with single pixel value features
 X = numpy.reshape(dat, (n*n,3))
+
 y = -numpy.ones(n*n)
 
 # convert (x,y) index into a flattened 1d array index
@@ -78,15 +81,7 @@ def set_label(pixel):
     
 numpy.apply_along_axis(set_label, 1, lab_samp_reduced)
 
-# https://github.com/aldro61/pu-learning/blob/master/src/examples/puAdapterExample.py
-from sklearn.svm import SVC
-from sklearn.ensemble import RandomForestClassifier
-
-#estimator = SVC(C=10,
-#                kernel='rbf',
-#                gamma='0.4',
-#                probability=True)
-estimator = RandomForestClassifier(n_estimators=100,
+estimator = RandomForestClassifier(n_estimators=500,
                                    criterion='gini',
                                    bootstrap=True)
 pu_estimator = PUAdapter(estimator)
@@ -102,15 +97,15 @@ y_fit_pos = [numpy.unravel_index(i, (n,n)) for i, x in enumerate(y_fit) if x == 
 dat_labeled = numpy.copy(dat)
 numpy.apply_along_axis(colour_labeled, 1, y_fit_pos)
 
-im2 = Image.fromarray(dat_labeled)
-im2.show()
+# -------------------------------
+# PUL - Random forest with single and all 8 neighbour pixel value features
 
 #X = []
-#for x in range(1,n-2):
-#    for y in range(1,n-2):
+#for x in range(1,n-1):
+#    for y in range(1,n-1):
 #        # features:
-#        # (x, y, <pixel values>, <8 neighbour pixel values>)
-#        row = [x,y]
+#        # (<pixel values>, <8 neighbour pixel values>)
+#        row = []
 #        row += dat[x,y,:].tolist()
 #        row += dat[x-1,y-1,:].tolist()
 #        row += dat[x,y-1,:].tolist()
@@ -122,6 +117,39 @@ im2.show()
 #        row += dat[x+1,y+1,:].tolist()
 #        X.append(row)
 #X = numpy.asarray(X)
-#Y = -numpy.ones(n*n)
+#
+#y = -numpy.ones((n-2)**2)
+#
+## convert (x,y) index into a flattened 1d array index
+#def get_flattened_index(x,y,n1,n2):
+#    i, = numpy.unravel_index(numpy.ravel_multi_index((x,y), (n1,n1)), n2)
+#    return i
+#
+#def set_label(pixel):
+#    if pixel[0] != 0 & pixel[0] != n-1 & pixel[1] != 0 & pixel[1] != n-1:
+#        y[get_flattened_index(pixel[0]-1,pixel[1]-1,n-2,(n-2)**2)] = 1
+#    
+#numpy.apply_along_axis(set_label, 1, lab_samp_reduced)
+#
+## https://github.com/aldro61/pu-learning/blob/master/src/examples/puAdapterExample.py
+#
+#estimator = RandomForestClassifier(n_estimators=500,
+#                                   criterion='gini',
+#                                   bootstrap=True)
+#pu_estimator = PUAdapter(estimator)
+#
+#pu_estimator.fit(X,y)
+#
+#y_fit = pu_estimator.predict(X)
+#y_fit = numpy.asarray(y_fit)
+#
+#y_fit_pos = [numpy.unravel_index(i, (n-2,n-2)) for i, x in enumerate(y_fit) if x == 1]
+#
+## display resulting labels
+#dat_labeled = numpy.copy(dat[1:n-1,1:n-1])
+#numpy.apply_along_axis(colour_labeled, 1, y_fit_pos)
+# -------------------------
 
+im2 = Image.fromarray(dat_labeled)
+im2.show()
 
