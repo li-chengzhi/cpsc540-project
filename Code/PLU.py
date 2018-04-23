@@ -4,6 +4,7 @@ import os
 
 import numpy as np
 from puAdapter import PUAdapter
+from labelProp import label_prop
 from sklearn.ensemble import RandomForestClassifier
 
 
@@ -19,7 +20,7 @@ save_images = True
 # Open image
 # ---------------------------------------------------
 data_dir = "../Dataset/"
-image_name = "1.tif"
+image_name = "1_1.tif"
 image = Image.open(data_dir + image_name)
 
 # Convert image into ndarray
@@ -103,13 +104,13 @@ if save_images:
 
 
 # Display sampled labeled pixels on subimage
-# ---------------------------------------------------    
+# ---------------------------------------------------
 dat_labeled = np.copy(dat)
 
 # Colour the labeled pixels
 def colour_labeled(x):
     dat_labeled[x[0],x[1]] = [255,0,0]   # Red
-    
+
 np.apply_along_axis(colour_labeled, 1, dat_labels)
 
 im_labeled = Image.fromarray(dat_labeled)
@@ -139,7 +140,7 @@ def get_flattened_index(x,y,n):
 # Set the corresponding labeled pixel in y to 1
 def set_labeled(x):
     y[get_flattened_index(x[0],x[1],n)] = 1
-    
+
 np.apply_along_axis(set_labeled, 1, dat_labels)
 
 # Fit PUL random forest classifier
@@ -198,7 +199,7 @@ y = -np.ones((n-2)**2)
 def set_labeled(x):
     if (x[0] != 0 and x[0] != n-1) and x[1] != 0 and x[1] != n-1:
         y[get_flattened_index(x[0]-1,x[1]-1,n-2)] = 1
-    
+
 np.apply_along_axis(set_labeled, 1, dat_labels)
 
 # Fit PUL random forest classifier
@@ -229,3 +230,45 @@ if save_images:
     im_pul2.save(save_name)
 if display_images:
     im_pul2.show()
+
+
+
+
+X = np.reshape(dat, (n*n,3))
+y = -np.zeros(n*n)
+
+# Convert (x,y) index to a flattened 1D-array index
+def get_flattened_index(x,y,n):
+    i, = np.unravel_index(np.ravel_multi_index((x,y), (n,n)), n*n)
+    return i
+
+# Set the corresponding labeled pixel in y to 1
+def set_labeled(x):
+    y[get_flattened_index(x[0],x[1],n)] = 1
+
+np.apply_along_axis(set_labeled, 1, dat_labels)
+
+
+
+
+for threshold in [0,1,5,10,20,50,100,200,300,400]:
+    # Fit Label propagation
+    yhat = label_prop(X,y,threshold=threshold)
+
+    # Convert the 1D-array indices into (x,y) indices
+    yhat_ii = [np.unravel_index(i, (n,n)) for i,x in enumerate(yhat) if x==1]
+
+    # Display predicted labels
+    dat_labeled = np.copy(dat)
+    np.apply_along_axis(colour_labeled, 1, yhat_ii)
+
+    im_pul1 = Image.fromarray(dat_labeled)
+    if save_images:
+        save_name = test_dir + "lp" + str(threshold) + "_" + image_num + ".png"
+        try:
+            os.remove(save_name)
+        except OSError:
+            pass
+        im_pul1.save(save_name)
+    if display_images:
+        im_pul1.show()
