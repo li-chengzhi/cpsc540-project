@@ -133,11 +133,8 @@ y = -np.ones(n*n)
 
 # Convert (x,y) index to a flattened 1D-array index
 def get_flattened_index(x,y,n):
-    try:
-        i, = np.unravel_index(np.ravel_multi_index((x,y), (n,n)), n*n)
-        return i
-    except:
-        print("Error: " + str(x) + ", " + str(y) + ", " + str(n))
+    i, = np.unravel_index(np.ravel_multi_index((x,y), (n,n)), n*n)
+    return i
 
 # Set the corresponding labeled pixel in y to 1
 def set_labeled(x):
