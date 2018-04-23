@@ -75,6 +75,32 @@ im2.show()
 X = numpy.reshape(dat, (n*n,3))
 y = numpy.reshape(labeled_2d, (n*n))
 
+
+from label_prop import label_prop
+mask = label_prop(X,y,n,n,20)
+
+trans_labs = [numpy.unravel_index(i, (n,n)) for i, x in enumerate(mask) if x == 1]
+
+# display resulting labels
+dat_labeled = numpy.copy(dat)
+numpy.apply_along_axis(colour_labeled, 1, trans_labs)
+
+im2 = Image.fromarray(dat_labeled)
+im2.show()
+
+
+
+
+
+
+
+
+
+
+
+
+'''
+
 # set -1 for unlabeled
 y[y == 0] = -1
 
@@ -137,3 +163,4 @@ numpy.apply_along_axis(colour_labeled, 1, trans_labs)
 
 im2 = Image.fromarray(dat_labeled)
 im2.show()
+'''
