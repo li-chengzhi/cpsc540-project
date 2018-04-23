@@ -57,11 +57,18 @@ dat_labeled = numpy.copy(dat)
 
 def colour_labeled(pixel):
     dat_labeled[pixel[0],pixel[1]] = [255,0,0]
-    
+
 numpy.apply_along_axis(colour_labeled, 1, lab_samp_reduced)
 
 im2 = Image.fromarray(dat_labeled)
 im2.show()
+
+
+
+
+
+
+
 
 
 # label propagation inputs
@@ -81,6 +88,7 @@ def colour_threshold(x):
 def get_flattened_index(x,y,n1,n2):
     i, = numpy.unravel_index(numpy.ravel_multi_index((x,y), (n1,n1)), n2)
     return i
+
 
 # include a negative label...
 y[get_flattened_index(n-1,0,n,n*n)] = 0
@@ -112,7 +120,9 @@ def custom_kernel(X1, X2):
     return W
 #    return -numpy.ones((X1.shape[0], X1.shape[0]))
 
-label_prop = label_propagation.LabelPropagation(custom_kernel, max_iter=50, n_jobs=-1)
+print(get_flattened_index(0,2,5,25))
+
+label_prop = label_propagation.LabelPropagation(custom_kernel, max_iter=500, n_jobs=-1)
 label_prop.fit(X,y)
 
 trans_labels = label_prop.transduction_
