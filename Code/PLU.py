@@ -1,9 +1,20 @@
 from PIL import Image
 import skimage.measure as skimage
+import os
 
 import numpy as np
 from puAdapter import PUAdapter
 from sklearn.ensemble import RandomForestClassifier
+
+
+# Running options:
+# ---------------------------------------------------
+# Set to False to avoid displaying images when running
+display_images = False
+
+# Set to False to avoid saving images to the Tests folder
+save_images = True
+
 
 # Open image
 # ---------------------------------------------------
@@ -78,6 +89,18 @@ dat_labels = list(zip(*np.where(dat_labels==1)))
 # Compute size of reduced image
 n = int(np.floor(n/s))
 
+# Save subimage
+test_dir = "../Tests/"
+image_num = "1"   # Change when running on different subimage
+im_sub = Image.fromarray(dat)
+if save_images:
+    save_name = test_dir + "subimage" + image_num + ".png"
+    try:
+        os.remove(save_name)
+    except OSError:
+        pass
+    im_sub.save(save_name)
+
 
 # Display sampled labeled pixels on subimage
 # ---------------------------------------------------    
@@ -90,7 +113,15 @@ def colour_labeled(x):
 np.apply_along_axis(colour_labeled, 1, dat_labels)
 
 im_labeled = Image.fromarray(dat_labeled)
-im_labeled.show()
+if save_images:
+    save_name = test_dir + "labeled" + image_num + ".png"
+    try:
+        os.remove(save_name)
+    except OSError:
+        pass
+    im_labeled.save(save_name)
+if display_images:
+    im_labeled.show()
 
 
 # PUL 1 - Random forest with only pixel RGB values
@@ -102,8 +133,11 @@ y = -np.ones(n*n)
 
 # Convert (x,y) index to a flattened 1D-array index
 def get_flattened_index(x,y,n):
-    i, = np.unravel_index(np.ravel_multi_index((x,y), (n,n)), n*n)
-    return i
+    try:
+        i, = np.unravel_index(np.ravel_multi_index((x,y), (n,n)), n*n)
+        return i
+    except:
+        print("Error: " + str(x) + ", " + str(y) + ", " + str(n))
 
 # Set the corresponding labeled pixel in y to 1
 def set_labeled(x):
@@ -130,7 +164,15 @@ dat_labeled = np.copy(dat)
 np.apply_along_axis(colour_labeled, 1, yhat_ii)
 
 im_pul1 = Image.fromarray(dat_labeled)
-im_pul1.show()
+if save_images:
+    save_name = test_dir + "pul1_" + image_num + ".png"
+    try:
+        os.remove(save_name)
+    except OSError:
+        pass
+    im_pul1.save(save_name)
+if display_images:
+    im_pul1.show()
 
 
 # PUL 2 - Random forest with pixel and 8-neighbour RGB values
@@ -156,9 +198,9 @@ X = np.asarray(X)
 y = -np.ones((n-2)**2)
 
 # Set the corresponding labeled pixel in y to 1
-def set_labeled(pixel):
-    if pixel[0] != 0 & pixel[0] != n-1 & pixel[1] != 0 & pixel[1] != n-1:
-        y[get_flattened_index(pixel[0]-1,pixel[1]-1,n-2)] = 1
+def set_labeled(x):
+    if (x[0] != 0 and x[0] != n-1) and x[1] != 0 and x[1] != n-1:
+        y[get_flattened_index(x[0]-1,x[1]-1,n-2)] = 1
     
 np.apply_along_axis(set_labeled, 1, dat_labels)
 
@@ -181,4 +223,12 @@ dat_labeled = np.copy(dat[1:n-1,1:n-1])
 np.apply_along_axis(colour_labeled, 1, yhat_ii)
 
 im_pul2 = Image.fromarray(dat_labeled)
-im_pul2.show()
+if save_images:
+    save_name = test_dir + "pul2_" + image_num + ".png"
+    try:
+        os.remove(save_name)
+    except OSError:
+        pass
+    im_pul2.save(save_name)
+if display_images:
+    im_pul2.show()
