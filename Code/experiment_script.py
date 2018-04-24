@@ -16,8 +16,11 @@ display_images = False
 # Set to False to avoid saving images to the Tests folder
 save_images = True
 
+# Set to False to avoid saving the subimage to the Dataset folder
+save_subimage = False
+
 # Set to True to read in original image
-original_image = True
+original_image = False
 
 
 # Change depending on image to run:
@@ -56,7 +59,7 @@ if original_image:
 
     # Save subimage
     im_sub = Image.fromarray(dat)
-    if save_images:
+    if save_subimage:
         save_name = data_dir + image_num + "_" + subimage_num + ".tif"
         try:
             os.remove(save_name)
