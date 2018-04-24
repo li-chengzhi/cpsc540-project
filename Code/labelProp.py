@@ -8,7 +8,7 @@ def get_neighbour_indices8(i, m, n):
     (x,y) = numpy.unravel_index(i, (m,n))
     return numpy.array([numpy.ravel_multi_index((a,b),(m,n)) for (a,b) in [(x-1,y-1), (x-1,y), (x-1,y+1), (x,y-1), (x,y), (x,y+1), (x+1,y-1), (x+1,y), (x+1,y+1)] if -1<a<m and -1<b<n])
 
-def label_prop(X, y, threshold, m=None, n=None, neighbourhood_size = 8):
+def label_prop(X, y, threshold, m=None, n=None, neighbourhood_size = 8, verbose=False):
     if m==None and n==None:
         m = n = numpy.sqrt(X.shape[0]).astype(int)
     elif m==None:
@@ -44,7 +44,10 @@ def label_prop(X, y, threshold, m=None, n=None, neighbourhood_size = 8):
             labeled pixels is lower than the threshold, label the pixel
             and add its neighbours to the set of neighbours '''
         min_diff = numpy.min(numpy.linalg.norm(X[i] - X[ii], axis=1))
-        print(min_diff)
+        
+        if verbose:
+            print(min_diff)
+            
         if (min_diff < threshold):
             labels[i] = True
             for j in neighbours:
