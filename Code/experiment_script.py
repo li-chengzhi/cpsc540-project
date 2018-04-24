@@ -125,7 +125,7 @@ n = int(np.floor(n/s))
 test_dir = "../Tests/"
 im_sub_red = Image.fromarray(dat)
 if save_images:
-    save_name = test_dir + subimage_num + "_subimage.png"
+    save_name = test_dir + image_num + "_" + subimage_num + "_subimage.png"
     try:
         os.remove(save_name)
     except OSError:
@@ -145,7 +145,7 @@ np.apply_along_axis(colour_labeled, 1, dat_labels)
 
 im_labeled = Image.fromarray(dat_labeled)
 if save_images:
-    save_name = test_dir + subimage_num + "_labeled.png"
+    save_name = test_dir + image_num + "_" + subimage_num + "_labeled.png"
     try:
         os.remove(save_name)
     except OSError:
@@ -193,7 +193,7 @@ np.apply_along_axis(colour_labeled, 1, yhat_ii)
 
 im_pul1 = Image.fromarray(dat_labeled)
 if save_images:
-    save_name = test_dir + subimage_num + "_pul1.png"
+    save_name = test_dir + image_num + "_" + subimage_num + "_pul1.png"
     try:
         os.remove(save_name)
     except OSError:
@@ -252,7 +252,7 @@ np.apply_along_axis(colour_labeled, 1, yhat_ii)
 
 im_pul2 = Image.fromarray(dat_labeled)
 if save_images:
-    save_name = test_dir + subimage_num + "_pul2.png"
+    save_name = test_dir + image_num + "_" + subimage_num + "_pul2.png"
     try:
         os.remove(save_name)
     except OSError:
@@ -286,7 +286,7 @@ for threshold in [0,1,5,10,20,50,100,200,300,400]:
 
     im_lp = Image.fromarray(dat_labeled)
     if save_images:
-        save_name = test_dir + subimage_num + "_lp" + str(threshold) + ".png"
+        save_name = test_dir + image_num + "_" + subimage_num + "_lp" + str(threshold) + ".png"
         try:
             os.remove(save_name)
         except OSError:
