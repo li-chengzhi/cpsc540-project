@@ -29,7 +29,7 @@ original_image = False
 image_num = "1"   # Change when running on different image
 
 # Subimage number
-subimage_num = "1"   # Change when running on different subimage
+subimage_num = "4"   # Change when running on different subimage
 
 # Image name
 if original_image:
@@ -176,34 +176,35 @@ def set_labeled(x):
 
 np.apply_along_axis(set_labeled, 1, dat_labels)
 
-# Fit PUL random forest classifier
-estimator = RandomForestClassifier(n_estimators=500,
-                                   criterion='gini',
-                                   bootstrap=True)
-pu_estimator = PUAdapter(estimator)
-pu_estimator.fit(X,y)
-
-# Get the fitted training labels
-yhat = pu_estimator.predict(X)
-yhat = np.asarray(yhat)
-
-# Convert the 1D-array indices into (x,y) indices
-yhat_ii = [np.unravel_index(i, (n,n)) for i,x in enumerate(yhat) if x==1]
-
-# Display predicted labels
-dat_labeled = np.copy(dat)
-np.apply_along_axis(colour_labeled, 1, yhat_ii)
-
-im_pul1 = Image.fromarray(dat_labeled)
-if save_images:
-    save_name = test_dir + image_num + "_" + subimage_num + "_pul1.png"
-    try:
-        os.remove(save_name)
-    except OSError:
-        pass
-    im_pul1.save(save_name)
-if display_images:
-    im_pul1.show()
+for n_trees in [10,50,100,250,500]:
+    # Fit PUL random forest classifier
+    estimator = RandomForestClassifier(n_estimators=n_trees,
+                                       criterion='gini',
+                                       bootstrap=True)
+    pu_estimator = PUAdapter(estimator)
+    pu_estimator.fit(X,y)
+    
+    # Get the fitted training labels
+    yhat = pu_estimator.predict(X)
+    yhat = np.asarray(yhat)
+    
+    # Convert the 1D-array indices into (x,y) indices
+    yhat_ii = [np.unravel_index(i, (n,n)) for i,x in enumerate(yhat) if x==1]
+    
+    # Display predicted labels
+    dat_labeled = np.copy(dat)
+    np.apply_along_axis(colour_labeled, 1, yhat_ii)
+    
+    im_pul1 = Image.fromarray(dat_labeled)
+    if save_images:
+        save_name = test_dir + image_num + "_" + subimage_num + "_pul1_" + str(n_trees) + ".png"
+        try:
+            os.remove(save_name)
+        except OSError:
+            pass
+        im_pul1.save(save_name)
+    if display_images:
+        im_pul1.show()
 
 
 # PUL 2 - Random forest with pixel and 8-neighbour RGB values
@@ -235,34 +236,35 @@ def set_labeled(x):
 
 np.apply_along_axis(set_labeled, 1, dat_labels)
 
-# Fit PUL random forest classifier
-estimator = RandomForestClassifier(n_estimators=500,
-                                   criterion='gini',
-                                   bootstrap=True)
-pu_estimator = PUAdapter(estimator)
-pu_estimator.fit(X,y)
-
-# Get the fitted training labels
-yhat = pu_estimator.predict(X)
-yhat = np.asarray(yhat)
-
-# Convert the 1D-array indices into (x,y) indices
-yhat_ii = [np.unravel_index(i, (n-2,n-2)) for i,x in enumerate(yhat) if x==1]
-
-# Display predicted labels
-dat_labeled = np.copy(dat[1:n-1,1:n-1])
-np.apply_along_axis(colour_labeled, 1, yhat_ii)
-
-im_pul2 = Image.fromarray(dat_labeled)
-if save_images:
-    save_name = test_dir + image_num + "_" + subimage_num + "_pul2.png"
-    try:
-        os.remove(save_name)
-    except OSError:
-        pass
-    im_pul2.save(save_name)
-if display_images:
-    im_pul2.show()
+for n_trees in [10,50,100,250,500]:
+    # Fit PUL random forest classifier
+    estimator = RandomForestClassifier(n_estimators=n_trees,
+                                       criterion='gini',
+                                       bootstrap=True)
+    pu_estimator = PUAdapter(estimator)
+    pu_estimator.fit(X,y)
+    
+    # Get the fitted training labels
+    yhat = pu_estimator.predict(X)
+    yhat = np.asarray(yhat)
+    
+    # Convert the 1D-array indices into (x,y) indices
+    yhat_ii = [np.unravel_index(i, (n-2,n-2)) for i,x in enumerate(yhat) if x==1]
+    
+    # Display predicted labels
+    dat_labeled = np.copy(dat[1:n-1,1:n-1])
+    np.apply_along_axis(colour_labeled, 1, yhat_ii)
+    
+    im_pul2 = Image.fromarray(dat_labeled)
+    if save_images:
+        save_name = test_dir + image_num + "_" + subimage_num + "_pul2_" + str(n_trees) + ".png"
+        try:
+            os.remove(save_name)
+        except OSError:
+            pass
+        im_pul2.save(save_name)
+    if display_images:
+        im_pul2.show()
 
 
 # Label propagation
